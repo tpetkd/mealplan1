@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>膳食費方案調查</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px 60px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: #1a3d6e;
+    color: #fff;
+    padding: 28px 28px 22px;
+  }
+  .card-header .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 6px;
+  }
+  .card-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .card-header p {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 6px;
+  }
+
+  .card-body {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  .field label span.req {
+    color: #e53e3e;
+    margin-left: 2px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #111;
+    transition: border-color .2s;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #1a3d6e; }
+
+  /* pill group */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill-btn {
+    padding: 9px 18px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .pill-btn:hover { border-color: #1a3d6e; color: #1a3d6e; }
+  .pill-btn.active {
+    background: #1a3d6e;
+    border-color: #1a3d6e;
+    color: #fff;
+  }
+
+  /* plan cards */
+  .plan-cards { display: flex; flex-direction: column; gap: 10px; }
+  .plan-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+  }
+  .plan-card:hover { border-color: #1a3d6e; }
+  .plan-card.active {
+    border-color: #1a3d6e;
+    background: #eef2f8;
+  }
+  .plan-card .badge {
+    display: inline-block;
+    background: #1a3d6e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 2px 8px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .plan-card.active .badge { background: #0f2a4e; }
+  .plan-card .plan-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a3d6e;
+    margin-bottom: 3px;
+  }
+  .plan-card .plan-desc {
+    font-size: 12.5px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  .plan-card .plan-amount {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a3d6e;
+    margin-top: 4px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: #1a3d6e;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .submit-btn:hover { background: #0f2a4e; }
+  .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+  /* states */
+  .msg { display: none; text-align: center; padding: 16px 0 4px; font-size: 14px; }
+  .msg.error { color: #e53e3e; display: block; }
+
+  .success-screen {
+    display: none;
+    padding: 48px 28px;
+    text-align: center;
+  }
+  .success-screen .icon {
+    font-size: 52px;
+    margin-bottom: 16px;
+  }
+  .success-screen h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a3d6e;
+    margin-bottom: 8px;
+  }
+  .success-screen p {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+  .summary-box {
+    background: #f0f4f8;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 18px 0 0;
+    text-align: left;
+    font-size: 13.5px;
+    line-height: 2;
+    color: #374151;
+  }
+  .summary-box strong { color: #1a3d6e; }
+</style>
+</head>
+<body>
+
+<div class="card" id="formCard">
+  <div class="card-header">
+    <div class="label">中華民國跆拳道協會</div>
+    <h1>膳食費方案調查</h1>
+    <p>請各隊員填寫本次參賽膳食費領取方式</p>
+  </div>
+  <div class="card-body">
+
+    <!-- 姓名 -->
+    <div class="field">
+      <label>姓名<span class="req">*</span></label>
+      <input type="text" id="name" placeholder="請輸入中文全名" autocomplete="off">
+    </div>
+
+    <!-- 身分 -->
+    <div class="field">
+      <label>此行身分<span class="req">*</span></label>
+      <div class="pills" id="roleGroup">
+        <button type="button" class="pill-btn" data-value="選手">選手</button>
+        <button type="button" class="pill-btn" data-value="教練">教練</button>
+        <button type="button" class="pill-btn" data-value="防護員>防護</button>
+        <button type="button" class="pill-btn" data-value="行政">行政</button>
+      </div>
+    </div>
+
+    <!-- 膳食費方案 -->
+    <div class="field">
+      <label>膳食費方案<span class="req">*</span></label>
+      <div class="plan-cards" id="planGroup">
+
+        <button type="button" class="plan-card" data-value="A｜全額自行管理（NT$4,800）">
+          <span class="badge">A</span>
+          <div>
+            <div class="plan-title">全額自行管理</div>
+            <div class="plan-desc">自行安排所有餐食，出發前一次領取全額。</div>
+            <div class="plan-amount">領取金額：NT$4,800</div>
+          </div>
+        </button>
+
+        <button type="button" class="plan-card" data-value="B｜儲值50%統一代購（先領NT$2,400）">
+          <span class="badge">B</span>
+          <div>
+            <div class="plan-title">儲值50%統一代購</div>
+            <div class="plan-desc">協會代為統一採購部分餐食，個人先領取半額。</div>
+            <div class="plan-amount">先領金額：NT$2,400</div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <div class="msg" id="errMsg"></div>
+
+    <button type="button" class="submit-btn" id="submitBtn" onclick="submitForm()">送出</button>
+  </div>
+</div>
+
+<!-- 成功畫面 -->
+<div class="card success-screen" id="successScreen">
+  <div class="icon">✅</div>
+  <h2>已成功送出！</h2>
+  <p>感謝填寫，協會將依您的選擇<br>安排膳食費發放事宜。</p>
+  <div class="summary-box" id="summaryBox"></div>
+</div>
+
+<script>
+  // ⚠️ 部署 Apps Script 後，將網址貼在這裡
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAl1oJwMyqGGhEEuAQWqeFABhR4aMgOPmD159BPL2YLzJiZj0lnAtc_prKqWkbZSXgFw/exec";
+
+  let selectedRole = "";
+  let selectedPlan = "";
+
+  // 身分選擇
+  document.querySelectorAll("#roleGroup .pill-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#roleGroup .pill-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedRole = btn.dataset.value;
+    });
+  });
+
+  // 方案選擇
+  document.querySelectorAll("#planGroup .plan-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll("#planGroup .plan-card").forEach(c => c.classList.remove("active"));
+      card.classList.add("active");
+      selectedPlan = card.dataset.value;
+    });
+  });
+
+  async function submitForm() {
+    const name = document.getElementById("name").value.trim();
+    const errMsg = document.getElementById("errMsg");
+    errMsg.className = "msg";
+    errMsg.textContent = "";
+
+    if (!name) { showErr("請填寫姓名"); return; }
+    if (!selectedRole) { showErr("請選擇身分"); return; }
+    if (!selectedPlan) { showErr("請選擇膳食費方案"); return; }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "送出中…";
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ name, role: selectedRole, plan: selectedPlan }),
+      });
+
+      document.getElementById("formCard").style.display = "none";
+      const success = document.getElementById("successScreen");
+      success.style.display = "block";
+      document.getElementById("summaryBox").innerHTML =
+        `<strong>姓名：</strong>${name}<br>` +
+        `<strong>身分：</strong>${selectedRole}<br>` +
+        `<strong>方案：</strong>${selectedPlan}`;
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = "送出";
+      showErr("送出失敗，請稍後再試。");
+    }
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById("errMsg");
+    el.textContent = msg;
+    el.className = "msg error";
+  }
+</script>
+</body>
+</html>
